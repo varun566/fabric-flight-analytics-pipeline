@@ -1,0 +1,17 @@
+{
+  "source_csv_path": "/lakehouse/default/Files/flight_ops/flight_operations.csv",
+  "tables": {
+    "bronze": "bronze_flights",
+    "silver": "silver_flights",
+    "gold_daily_route_performance": "gold_daily_route_performance",
+    "gold_hourly_volume": "gold_hourly_volume",
+    "quality_log": "quality_log"
+  },
+  "quality_thresholds": {
+    "max_null_rate": 0.01,
+    "min_silver_to_bronze_row_ratio": 0.95,
+    "max_gold_freshness_minutes": 60,
+    "z_score_threshold": 3.0
+  },
+  "on_time_delay_threshold_minutes": 15
+}

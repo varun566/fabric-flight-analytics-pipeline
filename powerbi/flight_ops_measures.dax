@@ -1,0 +1,18 @@
+Average Delay (min) =
+AVERAGE ( gold_daily_route_performance[avg_delay_min] )
+
+On-Time Performance % =
+AVERAGE ( gold_daily_route_performance[on_time_pct] )
+
+Cancellation Rate % =
+AVERAGE ( gold_daily_route_performance[cancellation_rate] )
+
+Anomalous Route Days =
+CALCULATE (
+    COUNTROWS ( gold_daily_route_performance ),
+    gold_daily_route_performance[delay_anomaly_flag] = TRUE ()
+)
+
+Passenger Throughput =
+SUM ( gold_hourly_volume[passenger_throughput] )
+
