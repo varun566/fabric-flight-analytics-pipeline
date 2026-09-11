@@ -42,6 +42,17 @@ python3 -m unittest discover -s tests
 
 The generator produces 24,000 primary flights plus 600 duplicate `flight_id` records. It introduces a minimal number of nulls in `origin`, `dest`, and `delay_min` so the Silver cleansing and data-quality controls can be demonstrated while retaining more than 95% of Bronze rows.
 
+### Local visual preview
+
+You can run a dependency-free local simulation of the same Bronze → Silver → Gold rules without a Fabric tenant:
+
+```bash
+python3 scripts/run_local_preview.py
+open outputs/flight_analytics_preview.html
+```
+
+The generated dashboard shows pipeline output counts, route-delay comparison, on-time trends, z-score alerts, and quality-check results. Fabric remains the production execution path; the preview is provided for quick portfolio demonstrations.
+
 ## Fabric workspace deployment
 
 1. In a Fabric-capacity workspace, create a Lakehouse named `FlightAnalyticsLakehouse`.

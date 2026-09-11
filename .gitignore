@@ -5,4 +5,4 @@ __pycache__/
 .coverage
 .ipynb_checkpoints/
 .fabric/
-
+outputs/
