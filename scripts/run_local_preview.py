@@ -196,11 +196,12 @@ def transform(rows: list[dict[str, str]], fieldnames: list[str] | None) -> dict[
         ),
         key=lambda item: item[0],
     )
-    anomalies = sorted(
+    all_anomalies = sorted(
         (row for row in daily_rows if row["delay_anomaly_flag"]),
         key=lambda row: abs(float(row["delay_z_score"])),
         reverse=True,
-    )[:12]
+    )
+    anomalies = all_anomalies[:12]
     avg_delay = sum(float(row["delay_total"]) for row in daily_rows) / sum(int(row["operated_flights"]) for row in daily_rows)
     on_time_pct = sum(int(row["on_time_flights"]) for row in daily_rows) / sum(int(row["operated_flights"]) for row in daily_rows)
     cancellation_rate = sum(int(row["cancelled_flights"]) for row in daily_rows) / silver_count
@@ -209,7 +210,7 @@ def transform(rows: list[dict[str, str]], fieldnames: list[str] | None) -> dict[
         ("Hourly volume row count", len(hourly_volume), 1, bool(hourly_volume)),
         ("Gold avg_delay_min null rate", rate(sum(row["avg_delay_min"] is None for row in daily_rows), len(daily_rows)), 0.01, rate(sum(row["avg_delay_min"] is None for row in daily_rows), len(daily_rows)) < 0.01),
         ("Silver-to-Gold freshness (minutes)", 0.0, 60.0, True),
-        ("Delay anomalies detected", len(anomalies), Z_SCORE_THRESHOLD, True),
+        ("Delay anomalies detected", len(all_anomalies), Z_SCORE_THRESHOLD, True),
     ]
 
     return {
@@ -218,6 +219,7 @@ def transform(rows: list[dict[str, str]], fieldnames: list[str] | None) -> dict[
         "daily_rows": daily_rows,
         "hourly_rows": len(hourly_volume),
         "anomalies": anomalies,
+        "anomaly_count": len(all_anomalies),
         "route_comparison": route_comparison,
         "trend": trend,
         "metrics": {
@@ -295,7 +297,7 @@ table {{ width: 100%; border-collapse: collapse; font-size: .85rem; }} th, td {{
 <p class=\"eyebrow\">Local execution preview</p><h1>Flight Operations Analytics</h1><p class=\"subtitle\">Bronze → Silver → Gold simulation using the committed synthetic flight dataset.</p>
 <section class=\"cards\"><article class=\"card\"><div class=\"label\">On-time performance</div><div class=\"value\">{float(metrics['on_time_pct']):.1%}</div></article><article class=\"card\"><div class=\"label\">Average delay</div><div class=\"value\">{float(metrics['avg_delay']):.1f} min</div></article><article class=\"card\"><div class=\"label\">Cancellation rate</div><div class=\"value\">{float(metrics['cancellation_rate']):.1%}</div></article><article class=\"card\"><div class=\"label\">Scheduled passengers</div><div class=\"value\">{int(metrics['passenger_count']):,}</div></article></section>
 <section class=\"grid\"><article class=\"panel\"><h2>On-time performance trend</h2>{trend_svg(result['trend'])}</article><article class=\"panel\"><h2>Routes with highest average delay</h2>{route_bars(result['route_comparison'])}</article></section>
-<section class=\"grid\"><article class=\"panel\"><h2>Delay anomaly alerts</h2><table><thead><tr><th>Date</th><th>Route</th><th>Avg delay</th><th>Z-score</th><th>Cancellation</th></tr></thead><tbody>{anomaly_rows}</tbody></table></article><article class=\"panel\"><h2>Pipeline outputs</h2><table><tbody><tr><td>Bronze rows</td><td>{int(result['bronze_count']):,}</td></tr><tr><td>Silver rows</td><td>{int(result['silver_count']):,}</td></tr><tr><td>Gold daily route rows</td><td>{len(result['daily_rows']):,}</td></tr><tr><td>Gold hourly volume rows</td><td>{int(result['hourly_rows']):,}</td></tr><tr><td>Detected anomalies</td><td>{len(anomalies):,}</td></tr></tbody></table></article></section>
+<section class=\"grid\"><article class=\"panel\"><h2>Top delay anomaly alerts</h2><table><thead><tr><th>Date</th><th>Route</th><th>Avg delay</th><th>Z-score</th><th>Cancellation</th></tr></thead><tbody>{anomaly_rows}</tbody></table></article><article class=\"panel\"><h2>Pipeline outputs</h2><table><tbody><tr><td>Bronze rows</td><td>{int(result['bronze_count']):,}</td></tr><tr><td>Silver rows</td><td>{int(result['silver_count']):,}</td></tr><tr><td>Gold daily route rows</td><td>{len(result['daily_rows']):,}</td></tr><tr><td>Gold hourly volume rows</td><td>{int(result['hourly_rows']):,}</td></tr><tr><td>Detected anomalies</td><td>{int(result['anomaly_count']):,}</td></tr></tbody></table></article></section>
 <section class=\"panel\" style=\"margin-top:18px\"><h2>Inline data-quality checks</h2><table><thead><tr><th>Layer</th><th>Check</th><th>Actual</th><th>Threshold</th><th>Status</th></tr></thead><tbody>{quality_rows}</tbody></table></section>
 <footer>Generated locally at {generated_at}. Fabric execution remains the production path; this preview mirrors its transformations without requiring a Fabric tenant.</footer></main></body></html>""",
         encoding="utf-8",

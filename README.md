@@ -53,6 +53,18 @@ open outputs/flight_analytics_preview.html
 
 The generated dashboard shows pipeline output counts, route-delay comparison, on-time trends, z-score alerts, and quality-check results. Fabric remains the production execution path; the preview is provided for quick portfolio demonstrations.
 
+### Local PySpark + Delta Lake
+
+For a no-account, no-card execution that creates real local Delta tables, install the compatible Spark and Delta packages and run:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-local.txt
+.venv/bin/python scripts/run_local_delta_pipeline.py
+```
+
+The runner writes `bronze_flights`, `silver_flights`, two Gold tables, and `quality_log` as Delta tables below `work/local_delta_lakehouse/Tables/`. It mirrors the Fabric notebook logic using local Spark; the existing visual preview remains available after the run.
+
 ## Fabric workspace deployment
 
 1. In a Fabric-capacity workspace, create a Lakehouse named `FlightAnalyticsLakehouse`.
