@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07111f" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307111f'/%3E%3Cpath d='M26 6 16 27l-4-9-7-3 21-9Z' fill='none' stroke='%2338bdf8' stroke-linejoin='round' stroke-width='2.4'/%3E%3C/svg%3E" />
+    <title>Flight Operations Analytics</title>
+    <style>
+/*__DASHBOARD_STYLES__*/
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#overview" aria-label="Flight Operations Analytics home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21.3 3.4 13.6 20l-3.1-7.5L3 9.4 21.3 3.4Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/><path d="m10.5 12 3.9-3.3" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/></svg>
+          </span>
+          <span><strong>FlightOps</strong><small>ANALYTICS</small></span>
+        </a>
+        <div class="topbar-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Pipeline healthy</span>
+          <span class="status-divider" aria-hidden="true"></span>
+          <span id="lastUpdated">Local data snapshot</span>
+        </div>
+      </header>
+
+      <main class="dashboard" id="overview">
+        <section class="hero" aria-labelledby="pageTitle">
+          <div>
+            <p class="eyebrow">MEDALLION LAKEHOUSE · FLIGHT OPERATIONS</p>
+            <h1 id="pageTitle">Turn flight data into<br /><em>operational clarity.</em></h1>
+            <p class="hero-copy">Monitor on-time performance, route health, and unusual delay patterns from the Gold analytics layer.</p>
+          </div>
+          <div class="hero-meta" aria-label="Data coverage">
+            <span class="meta-label">Coverage</span>
+            <strong id="coverageRange">—</strong>
+            <span class="meta-detail" id="coverageDetails">—</span>
+          </div>
+        </section>
+
+        <section class="command-bar" aria-label="Dashboard controls">
+          <div class="view-switcher" role="tablist" aria-label="Dashboard view">
+            <button class="view-button is-active" type="button" role="tab" aria-selected="true" aria-controls="overviewPanel" data-view="overview">Operations overview</button>
+            <button class="view-button" type="button" role="tab" aria-selected="false" aria-controls="qualityPanel" data-view="quality">Data quality</button>
+          </div>
+          <div class="filters">
+            <label class="route-filter" for="routeSelect">
+              <span>Focus route</span>
+              <select id="routeSelect" aria-label="Focus dashboard on a route"></select>
+            </label>
+            <button class="reset-button" id="resetFilters" type="button">Reset</button>
+          </div>
+        </section>
+
+        <section id="overviewPanel" role="tabpanel" aria-label="Operations overview">
+          <section class="metric-grid" aria-label="Key performance indicators">
+            <article class="metric-card metric-card-primary">
+              <span class="metric-icon metric-icon-blue" aria-hidden="true">↗</span>
+              <div><p>On-time performance</p><strong id="onTimeMetric">—</strong><small id="onTimeDetail">—</small></div>
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon metric-icon-amber" aria-hidden="true">◷</span>
+              <div><p>Average delay</p><strong id="delayMetric">—</strong><small id="delayDetail">Operated flights only</small></div>
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon metric-icon-rose" aria-hidden="true">×</span>
+              <div><p>Cancellation rate</p><strong id="cancellationMetric">—</strong><small id="cancellationDetail">—</small></div>
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon metric-icon-mint" aria-hidden="true">◎</span>
+              <div><p>Scheduled passengers</p><strong id="passengerMetric">—</strong><small id="passengerDetail">—</small></div>
+            </article>
+          </section>
+
+          <section class="primary-grid">
+            <article class="panel trend-panel">
+              <div class="panel-heading">
+                <div><p class="panel-kicker">PERFORMANCE TREND</p><h2 id="trendTitle">On-time performance</h2></div>
+                <span class="panel-badge" id="trendBadge">Daily view</span>
+              </div>
+              <div class="chart-wrap" id="trendChart" aria-live="polite"></div>
+              <div class="chart-caption"><span><i class="legend-line" aria-hidden="true"></i>On-time percentage</span><span id="trendSummary">—</span></div>
+            </article>
+
+            <aside class="panel attention-panel" aria-labelledby="attentionTitle">
+              <div class="panel-heading compact-heading">
+                <div><p class="panel-kicker">MONITORING</p><h2 id="attentionTitle">Attention needed</h2></div>
+                <span class="alert-pill" id="anomalyCount">—</span>
+              </div>
+              <p class="attention-copy">Route-days with statistically unusual average delay, based on a z-score threshold of 3.0.</p>
+              <div class="attention-list" id="attentionList"></div>
+              <div class="attention-footer"><span>Quality gates</span><strong id="qualityStatus">—</strong></div>
+            </aside>
+          </section>
+
+          <section class="secondary-grid">
+            <article class="panel route-panel">
+              <div class="panel-heading">
+                <div><p class="panel-kicker">ROUTE COMPARISON</p><h2>Delay performance by route</h2></div>
+                <span class="panel-badge">Highest avg. delay</span>
+              </div>
+              <div class="route-table-wrap">
+                <table class="route-table">
+                  <thead><tr><th>Route</th><th>Average delay</th><th>On-time</th><th>Flights</th></tr></thead>
+                  <tbody id="routeTableBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="panel pipeline-panel">
+              <div class="panel-heading"><div><p class="panel-kicker">PIPELINE OUTPUTS</p><h2>Data products</h2></div></div>
+              <div class="pipeline-list" id="pipelineList"></div>
+              <div class="pipeline-footnote">Delta Lake tables produced by the Bronze → Silver → Gold pipeline.</div>
+            </article>
+          </section>
+
+          <section class="panel anomaly-panel" aria-labelledby="anomalyTitle">
+            <div class="panel-heading anomaly-heading">
+              <div><p class="panel-kicker">EXCEPTION MANAGEMENT</p><h2 id="anomalyTitle">Delay anomaly alerts</h2></div>
+              <label class="search-box" for="anomalySearch"><span class="visually-hidden">Search anomaly alerts</span><input id="anomalySearch" type="search" placeholder="Search route or date" /></label>
+            </div>
+            <div class="table-scroll"><table class="anomaly-table"><thead><tr><th>Date</th><th>Route</th><th>Avg. delay</th><th>Z-score</th><th>Cancellation</th><th>Flights</th></tr></thead><tbody id="anomalyTableBody"></tbody></table></div>
+            <p class="empty-state" id="anomalyEmpty" hidden>No anomaly alerts match the current route and search.</p>
+          </section>
+        </section>
+
+        <section id="qualityPanel" class="quality-view" role="tabpanel" aria-label="Data quality" hidden>
+          <section class="quality-hero panel">
+            <div><p class="panel-kicker">QUALITY OBSERVABILITY</p><h2>Trust the data before acting on it.</h2><p>Every pipeline stage measures completeness, row-count movement, freshness, and statistical anomalies before data reaches the dashboard.</p></div>
+            <div class="quality-score"><span>Passed checks</span><strong id="qualityScore">—</strong><small>critical checks passed</small></div>
+          </section>
+          <section class="quality-summary" id="qualitySummary"></section>
+          <section class="panel quality-table-panel">
+            <div class="panel-heading"><div><p class="panel-kicker">QUALITY LOG</p><h2>Inline data-quality checks</h2></div><span class="panel-badge">Threshold-driven</span></div>
+            <div class="table-scroll"><table class="quality-table"><thead><tr><th>Layer</th><th>Check</th><th>Actual</th><th>Threshold</th><th>Status</th></tr></thead><tbody id="qualityTableBody"></tbody></table></div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="app-footer"><span>Flight Operations Analytics</span><span>Built from a synthetic CSV through a PySpark + Delta Lake Medallion pipeline.</span></footer>
+    </div>
+    <script>const FLIGHT_ANALYTICS_DATA = /*__DASHBOARD_DATA__*/;</script>
+    <script>
+/*__DASHBOARD_APP__*/
+    </script>
+  </body>
+</html>

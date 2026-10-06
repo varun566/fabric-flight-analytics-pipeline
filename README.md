@@ -53,6 +53,23 @@ open outputs/flight_analytics_preview.html
 
 The generated dashboard shows pipeline output counts, route-delay comparison, on-time trends, z-score alerts, and quality-check results. Fabric remains the production execution path; the preview is provided for quick portfolio demonstrations.
 
+### Interactive frontend dashboard
+
+Build the polished, dependency-free frontend dashboard with route filtering, chart tooltips, anomaly search, and a data-quality view:
+
+```bash
+python3 scripts/build_frontend.py
+open outputs/flight_analytics_dashboard.html
+```
+
+The frontend is self-contained, so it can also be served from the project root with `python3 -m http.server 8765` and opened at `/outputs/flight_analytics_dashboard.html`. Its embedded dashboard model is rebuilt from the same synthetic flight CSV used by the pipeline.
+
+For GitHub Pages, build the site artifact into the repository's `docs/` directory:
+
+```bash
+python3 scripts/build_frontend.py --output docs/index.html
+```
+
 ### Local PySpark + Delta Lake
 
 For a no-account, no-card execution that creates real local Delta tables, install the compatible Spark and Delta packages and run:
